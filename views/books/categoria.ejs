@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>BiblioApp - Categorías</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1519682337058-a94d519337bc') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+    .card {
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+    }
+    .card-header {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    .btn-add-custom {
+      background: linear-gradient(45deg, #007bff, #6610f2);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      font-weight: bold;
+      border-radius: 30px;
+      transition: 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-add-custom.btn-sm {
+      padding: 8px 22px;
+      font-size: 0.8rem;
+    }
+    .btn-add-custom:hover {
+      background: linear-gradient(45deg, #6610f2, #007bff);
+      color: #fff;
+      text-decoration: none;
+    }
+    .sidebar {
+      background-color: rgba(0, 0, 0, 0.8);
+      min-height: 100vh;
+    }
+    .nav-link {
+      color: #fff;
+    }
+    .nav-link:hover {
+      color: #ffc107;
+    }
+    .avatar-small {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .modal-content {
+      background-color: #000;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    .modal-header, .modal-footer {
+      border-color: #444;
+    }
+    .btn-close {
+      filter: invert(1);
+    }
+    .table th, .table td {
+      color: #fff;
+    }
+    footer {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark w-100" style="margin-bottom: 0; border-radius: 0;">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <span class="font-weight-bold">📚 Mi Biblioteca</span>
+    </a>
+  </nav>
+
+  <div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar -->
+    <div class="sidebar p-3 text-white" style="width: 250px;">
+      <div class="text-center mb-4">
+        <img 
+          src="/images/obed.png" 
+          alt="Usuario hombre" 
+          class="avatar-small mb-2" 
+        />
+        <h6>Obed Alvarez</h6>
+        <small class="text-success">● En línea</small>
+      </div>
+      <ul class="nav flex-column">
+        <li class="nav-item mb-2"><a class="nav-link" href="/">📊 Dashboard</a></li>
+        <li class="nav-item mb-2"><a class="nav-link" href="/books/autores">🖋 Autores</a></li>
+        <li class="nav-item"><a class="nav-link" href="/books/editoriales">🏢 Editoriales</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/books/categorias">📂 Categorias</a></li>
+        <li class="nav-item"><a class="nav-link" href="/books">📖 Libros</a></li>
+      </ul>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container mt-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="text-dark w-100 text-center" style="font-weight:bold; font-size:1.5rem;">Gestión de Categorías</span>
+          <button class="btn-add-custom btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregarCategoria">
+            <i class="bi bi-plus-circle"></i> Nueva Categoría
+          </button>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-hover table-dark">
+            <thead class="table-light">
+              <tr>
+                <th class="text-dark">#</th>
+                <th class="text-dark">Nombre</th>
+                <th class="text-dark">Estado</th>
+                <th class="text-dark">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% categorias.forEach((categoria, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= categoria.nombre %></td>
+                  <td><%= categoria.estado %></td>
+                  <td>
+                    <button 
+                      class="btn btn-primary btn-sm btn-editar"
+                      data-id="<%= categoria.id %>"
+                      data-nombre="<%= categoria.nombre %>"
+                      data-estado="<%= categoria.estado %>"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalEditarCategoria"
+                    >✏️ Editar</button>
+                    <button 
+                      class="btn btn-danger btn-sm btn-eliminar"
+                      data-id="<%= categoria.id %>"
+                      data-nombre="<%= categoria.nombre %>"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modalEliminarCategoria"
+                    >🗑️ Eliminar</button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar categoría -->
+  <div class="modal fade" id="modalAgregarCategoria" tabindex="-1" aria-labelledby="modalAgregarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAgregarCategoriaLabel">Nueva Categoría</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form action="/books/categorias/add" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre:</label>
+              <input type="text" class="form-control" id="nombre" name="nombre" required autocomplete="off">
+            </div>
+            <div class="mb-3">
+              <label for="estado" class="form-label">Estado:</label>
+              <select class="form-select" id="estado" name="estado" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar categoría -->
+  <div class="modal fade" id="modalEditarCategoria" tabindex="-1" aria-labelledby="modalEditarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarCategoriaLabel">Editar Categoría</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form id="formEditarCategoria" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit-nombre" class="form-label">Nombre:</label>
+              <input type="text" class="form-control" id="edit-nombre" name="nombre" required autocomplete="off">
+            </div>
+            <div class="mb-3">
+              <label for="edit-estado" class="form-label">Estado:</label>
+              <select class="form-select" id="edit-estado" name="estado" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para eliminar categoría -->
+  <div class="modal fade" id="modalEliminarCategoria" tabindex="-1" aria-labelledby="modalEliminarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEliminarCategoriaLabel">Eliminar Categoría</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <form id="formEliminarCategoria" method="POST">
+          <div class="modal-body">
+            <p>¿Seguro que deseas eliminar la categoría <strong id="delete-nombre"></strong>?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.querySelectorAll('.btn-editar').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const nombre = this.getAttribute('data-nombre');
+        const estado = this.getAttribute('data-estado');
+        document.getElementById('edit-nombre').value = nombre;
+        document.getElementById('edit-estado').value = estado;
+        document.getElementById('formEditarCategoria').action = `/books/categorias/edit/${id}`;
+      });
+    });
+
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const nombre = this.getAttribute('data-nombre');
+        document.getElementById('delete-nombre').textContent = nombre;
+        document.getElementById('formEliminarCategoria').action = `/books/categorias/delete/${id}`;
+      });
+    });
+  </script>
+  <footer class="text-white text-center py-3 mt-auto w-100">
+    &copy; 2025 Mi Biblioteca. Todos los derechos reservados.
+    <span class="float-right mr-4">Versión 1.0</span>
+  </footer>
+</body>
+</html>
