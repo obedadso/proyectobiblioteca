@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel Usuario - Mi Biblioteca</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: url('https://images.unsplash.com/photo-1519682337058-a94d519337bc') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .navbar {
+      background-color: #222;
+      color: #fff;
+    }
+    .navbar .navbar-brand {
+      color: #fff;
+      font-weight: 600;
+    }
+    .navbar .navbar-brand:hover {
+      color: #d1e3fa;
+    }
+    .btn-logout-custom {
+      background: #fff !important;
+      color: #222 !important;
+      border: 1px solid #222 !important;
+      font-weight: bold;
+      border-radius: 30px;
+      padding: 6px 18px;
+      transition: 0.3s;
+    }
+    .btn-logout-custom:hover {
+      background: #222 !important;
+      color: #fff !important;
+      border: 1px solid #fff !important;
+      text-decoration: none;
+    }
+    .section-title {
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    .book-card {
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
+      border: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+    }
+    .book-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 4px 24px rgba(13, 110, 253, 0.18);
+    }
+    .book-cover {
+      height: 180px;
+      object-fit: cover;
+      border-radius: 1rem 1rem 0 0;
+    }
+    .btn-prestar {
+      background: #fff;
+      color: #222;
+      border: 1px solid #222;
+      border-radius: 2rem;
+      padding: 0.4rem 1.6rem;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      transition: background 0.3s, color 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .btn-prestar:hover {
+      background: #222;
+      color: #fff;
+      border: 1px solid #fff;
+    }
+    .info-box {
+      background: #222;
+      color: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      margin-bottom: 2rem;
+      border-left: 5px solid #fff;
+    }
+    .category-badge {
+      background: #444;
+      color: #fff;
+      font-size: 0.95rem;
+      border-radius: 1rem;
+      padding: 0.2em 0.8em;
+      margin-right: 0.5em;
+    }
+    .prestado-alert {
+      display: block;
+      margin-top: 0.8em;
+      padding: 0.5em 1em;
+      border-radius: 1rem;
+      background: #fff;
+      color: #222;
+      border: 1px solid #444;
+      font-size: 0.95rem;
+      text-align: center;
+      font-weight: 500;
+    }
+    .author-card {
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border-radius: 1rem;
+      border: none;
+    }
+    .modal-content {
+      background-color: #000;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 1.5rem;
+    }
+    .modal-header, .modal-footer {
+      border-color: #444;
+      background: #111;
+      color: #fff;
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+    .btn-close {
+      filter: invert(1);
+    }
+    .form-label, .form-control, .form-control:focus {
+      color: #fff;
+      background: #222;
+      border-radius: 1rem;
+      border: none;
+      font-weight: 500;
+    }
+    .form-control:focus {
+      box-shadow: 0 0 0 2px #fff;
+    }
+    .btn-primary {
+      background: #fff;
+      color: #222;
+      border: 1px solid #222;
+      border-radius: 2rem;
+      font-weight: 600;
+      padding: 0.4rem 1.6rem;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-primary:hover {
+      background: #222;
+      color: #fff;
+      border: 1px solid #fff;
+    }
+    .btn-secondary {
+      border-radius: 2rem;
+      font-weight: 600;
+      padding: 0.4rem 1.6rem;
+      background: #fff;
+      color: #222;
+      border: 1px solid #222;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-secondary:hover {
+      background: #222;
+      color: #fff;
+      border: 1px solid #fff;
+    }
+    footer {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar igual que index.ejs -->
+  <nav class="navbar navbar-expand-lg navbar-dark w-100" style="margin-bottom: 0; border-radius: 0;">
+    <a class="navbar-brand d-flex align-items-center" href="/dashboard-usuario">
+      <span class="font-weight-bold">📚 Mi Biblioteca</span>
+    </a>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="btn btn-logout-custom btn-sm ml-2" href="/logout">
+          <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="container py-4">
+    <div class="info-box mb-4">
+      <h2 class="mb-0">¡Bienvenido!</h2>
+      <p class="mb-1">Explora los libros, autores y categorías disponibles. Puedes ver y prestar libros agregados por el administrador.</p>
+    </div>
+
+    <% if (messages && messages.error && messages.error.length) { %>
+      <div class="alert alert-danger text-center"><%= messages.error[0] %></div>
+    <% } %>
+    <% if (messages && messages.success && messages.success.length) { %>
+      <div class="alert alert-success text-center"><%= messages.success[0] %></div>
+    <% } %>
+
+   
+
+    <!-- Libros disponibles -->
+    <div>
+      <h4 class="section-title"><i class="bi bi-book me-2"></i>Libros Disponibles</h4>
+      <div class="row g-4">
+        <% if (libros && libros.length > 0) { %>
+          <% libros.forEach(function(libro, idx) { %>
+            <div class="col-md-4 col-lg-3">
+              <div class="card book-card h-100">
+                <img src="<%= libro.imagen_url 
+                  || (idx === 0 ? 'https://covers.openlibrary.org/b/id/10523339-L.jpg'
+                  : idx === 1 ? 'https://covers.openlibrary.org/b/id/11153227-L.jpg'
+                  : idx === 2 ? 'https://covers.openlibrary.org/b/id/10958330-L.jpg'
+                  : 'https://m.media-amazon.com/images/I/71UwSHSZRnS.jpg') %>" class="card-img-top book-cover" alt="Portada libro">
+                <div class="card-body text-center">
+                  <h6 class="fw-bold"><%= libro.name %></h6>
+                  <div class="text-muted small mb-1">
+                    Autor: <%= libro.autor %><br>
+                    Editorial: <%= libro.editorial %>
+                  </div>
+                  <div>
+                    <span class="category-badge"><i class="bi bi-tags"></i> <%= libro.categoria %></span>
+                  </div>
+                  <div class="mt-2">
+                    <% if (!libro.prestado) { %>
+                      <button 
+                        type="button" 
+                        class="btn btn-prestar" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalPrestar" 
+                        data-libro-id="<%= libro.id %>" 
+                        data-libro-nombre="<%= libro.name %>">
+                        <i class="bi bi-journal-arrow-up"></i> Prestar
+                      </button>
+                    <% } else { %>
+                      <span class="badge bg-danger">No disponible</span>
+                      <div class="prestado-alert">
+                        Este libro ya está prestado. Puedes consultar su estado más tarde.
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="col-12">
+            <div class="alert alert-warning text-center">No hay libros disponibles en este momento.</div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Modal para préstamo -->
+    <div class="modal fade" id="modalPrestar" tabindex="-1" aria-labelledby="modalPrestarLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form id="form-prestar" action="/books/prestamos/add" method="POST">
+          <div class="modal-content" style="background:#111; color:#fff; border-radius:1.5rem; border:1px solid #444;">
+            <div class="modal-header" style="background:#000; border-bottom:1px solid #444; border-radius:1.5rem 1.5rem 0 0;">
+              <h5 class="modal-title" id="modalPrestarLabel" style="color:#fff;"><i class="bi bi-journal-arrow-up"></i> Prestar Libro</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" style="filter:invert(1);"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label" style="color:#fff;">Libro:</label>
+                <input type="text" class="form-control" id="nombre-libro-modal" readonly style="background:#222; color:#fff; border:none; border-radius:1rem;">
+                <input type="hidden" name="libro" id="input-libro-id">
+                <input type="hidden" name="usuario" value="<%= user.id %>">
+              </div>
+              <div class="mb-3">
+                <label for="fecha_prestamo" class="form-label" style="color:#fff;">Fecha de Préstamo:</label>
+                <input type="date" class="form-control" name="fecha_prestamo" id="fecha_prestamo" required value="<%= new Date().toISOString().slice(0,10) %>" style="background:#222; color:#fff; border:none; border-radius:1rem;">
+              </div>
+              <div class="mb-3">
+                <label for="fecha_devolucion" class="form-label" style="color:#fff;">Fecha de Devolución:</label>
+                <input type="date" class="form-control" name="fecha_devolucion" id="fecha_devolucion" required style="background:#222; color:#fff; border:none; border-radius:1rem;">
+              </div>
+              <div class="mb-3">
+                <label class="form-label" style="color:#fff;">Estado:</label>
+                <input type="text" class="form-control" name="estado" value="Prestado" readonly style="background:#222; color:#fff; border:none; border-radius:1rem;">
+              </div>
+              <div id="alerta-prestado-modal" class="alert alert-warning d-none" role="alert" style="background:#222; color:#fff; border:1px solid #444;">
+                Este libro ya está prestado y no puede ser solicitado nuevamente.
+              </div>
+            </div>
+            <div class="modal-footer" style="background:#000; border-top:1px solid #444; border-radius:0 0 1.5rem 1.5rem;">
+              <button type="submit" class="btn btn-primary" style="background:#fff; color:#111; border:1px solid #444; border-radius:2rem; font-weight:600;">Guardar Préstamo</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background:#222; color:#fff; border:1px solid #fff; border-radius:2rem; font-weight:600;">Cancelar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+     <!-- Préstamos activos del usuario -->
+    <div class="mb-5">
+      <h4 class="section-title"><i class="bi bi-journal-arrow-up"></i> Mis Préstamos Activos</h4>
+      <table class="table table-dark table-striped">
+        <thead>
+          <tr>
+            <th>Libro</th>
+            <th>Fecha Préstamo</th>
+            <th>Fecha Devolución</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (typeof prestamosActivos !== 'undefined' && prestamosActivos.length > 0) { %>
+            <% prestamosActivos.forEach(function(prestamo) { %>
+              <tr>
+                <td><%= prestamo.libro %></td>
+                <td><%= prestamo.fecha_prestamo %></td>
+                <td><%= prestamo.fecha_devolucion %></td>
+                <td>
+                  <form action="/books/prestamos/devolver/<%= prestamo.id %>" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm">
+                      <i class="bi bi-arrow-return-left"></i> Devolver
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="4" class="text-center">No tienes préstamos activos.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    <!-- Autores disponibles -->
+    <div>
+      <h4 class="section-title"><i class="bi bi-people me-2"></i>Autores Disponibles</h4>
+      <div class="row g-3">
+        <% if (autores && autores.length > 0) { %>
+          <% autores.forEach(function(autor) { %>
+            <div class="col-md-3">
+              <div class="card author-card p-3 h-100 text-center">
+                <i class="bi bi-person-lines-fill fs-1 text-primary mb-2"></i>
+                <div class="fw-bold"><%= autor.nombre %></div>
+                <div class="text-muted small">ID: <%= autor.id %></div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="col-12">
+            <div class="alert alert-warning text-center">No hay autores registrados.</div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Categorías disponibles -->
+    <div>
+      <h4 class="section-title"><i class="bi bi-tags me-2"></i>Categorías Disponibles</h4>
+      <div class="row g-2">
+        <% if (categorias && categorias.length > 0) { %>
+          <% categorias.forEach(function(cat) { %>
+            <div class="col-auto mb-2">
+              <span class="category-badge"><i class="bi bi-tag"></i> <%= cat.nombre %></span>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="col-12">
+            <div class="alert alert-warning text-center">No hay categorías registradas.</div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <!-- Footer igual que index.ejs -->
+  <footer class="text-white text-center py-3 mt-auto w-100">
+    &copy; 2025 Mi Biblioteca. Todos los derechos reservados.
+    <span class="float-right mr-4">Versión 1.0</span>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Genera el objeto librosPrestados correctamente usando EJS y JSON
+    var librosPrestados = <%- JSON.stringify(
+      (libros || []).reduce(function(acc, libro) {
+        acc[libro.id] = !!libro.prestado;
+        return acc;
+      }, {})
+    ) %>;
+
+    // Maneja el botón "Prestar" para mostrar el modal con el libro correcto
+    var modalPrestar = document.getElementById('modalPrestar');
+
+    modalPrestar.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var libroId = button.getAttribute('data-libro-id');
+      var libroNombre = button.getAttribute('data-libro-nombre');
+      document.getElementById('input-libro-id').value = libroId;
+      document.getElementById('nombre-libro-modal').value = libroNombre;
+      document.getElementById('fecha_prestamo').value = new Date().toISOString().slice(0,10);
+      document.getElementById('fecha_devolucion').value = "";
+
+      // Verifica si el libro está prestado y muestra alerta en el modal
+      var alertaModal = document.getElementById('alerta-prestado-modal');
+      var submitBtn = document.querySelector('#form-prestar button[type="submit"]');
+      if (librosPrestados[libroId]) {
+        alertaModal.classList.remove('d-none');
+        submitBtn.disabled = true;
+      } else {
+        alertaModal.classList.add('d-none');
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Previene el envío del formulario si el libro está prestado (doble capa de seguridad)
+    document.getElementById('form-prestar').addEventListener('submit', function(e) {
+      var libroId = document.getElementById('input-libro-id').value;
+      if (librosPrestados[libroId]) {
+        e.preventDefault();
+        var alertaModal = document.getElementById('alerta-prestado-modal');
+        alertaModal.classList.remove('d-none');
+      }
+    });
+  </script>
+</body>
+</html>

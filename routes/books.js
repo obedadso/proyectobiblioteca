@@ -4,6 +4,8 @@ var dbConn = require('../lib/db');
 
 // ==================== CRUD LIBROS ====================
 
+// ...código existente arriba...
+
 // Mostrar todos los libros (listado principal y formulario) con paginado y búsqueda
 router.get('/', function(req, res) {
     const librosPorPagina = 10;
@@ -55,7 +57,12 @@ router.get('/', function(req, res) {
                     if (err3) editoriales = [];
                     dbConn.query('SELECT * FROM categorias', function(err4, categorias) {
                         if (err4) categorias = [];
-                        res.render('books/libro', {
+                        // Cambia la vista según el rol
+                        let vista = 'books/libro';
+                        if (req.session.user && req.session.user.rol === 'bibliotecario') {
+                            vista = 'bibliotecario/libros';
+                        }
+                        res.render(vista, {
                             libros,
                             libro: null,
                             autores,
@@ -74,6 +81,8 @@ router.get('/', function(req, res) {
         });
     });
 });
+
+// ...código existente abajo...
 
 // Mostrar formulario para agregar libro
 router.get('/add', function(req, res) {
@@ -331,6 +340,133 @@ router.post('/categorias/delete/:id', function(req, res) {
 
 router.get('/libro', function(req, res) {
     res.redirect('/books');
+});
+
+// ==================== CRUD PRÉSTAMOS ====================
+
+// Listar préstamos
+router.get('/prestamos', function(req, res) {
+    dbConn.query(
+        `SELECT prestamos.*, 
+                libros.name AS libro_nombre, 
+                usuarios.nombre AS usuario_nombre 
+         FROM prestamos 
+         JOIN libros ON prestamos.libro_id = libros.id 
+         JOIN usuarios ON prestamos.usuario_id = usuarios.id`,
+        function(err, prestamos) {
+            if (err) prestamos = [];
+            dbConn.query('SELECT id, name FROM libros', function(err2, libros) {
+                if (err2) libros = [];
+                dbConn.query('SELECT id, nombre FROM usuarios', function(err3, usuarios) {
+                    if (err3) usuarios = [];
+                    res.render('books/prestamos', {
+                        prestamos,
+                        libros,
+                        usuarios,
+                        success: req.flash('success'),
+                        error: req.flash('error')
+                    });
+                });
+            });
+        }
+    );
+});
+
+// Agregar préstamo
+router.post('/prestamos/add', function(req, res) {
+    // Puedes dejar la verificación de sesión si quieres
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    const { libro, usuario, fecha_prestamo, fecha_devolucion, estado } = req.body;
+    dbConn.query(
+        'INSERT INTO prestamos (libro_id, usuario_id, fecha_prestamo, fecha_devolucion, estado) VALUES (?, ?, ?, ?, ?)',
+        [libro, usuario, fecha_prestamo, fecha_devolucion, estado],
+        function(err) {
+            if (err) {
+                req.flash('error', 'Hubo un error al agregar el préstamo');
+                return res.redirect('/books/prestamos');
+            }
+            // Cambia el estado del libro a "Prestado"
+            dbConn.query(
+                'UPDATE libros SET estado = ? WHERE id = ?',
+                ['Prestado', libro],
+                function(err2) {
+                    if (err2) {
+                        req.flash('error', 'El préstamo se registró pero no se pudo actualizar el estado del libro');
+                    } else {
+                        req.flash('success', 'Préstamo agregado con éxito');
+                    }
+                    res.redirect('/books/prestamos');
+                }
+            );
+        }
+    );
+});
+// Editar préstamo
+router.post('/prestamos/edit/:id', function(req, res) {
+    const { libro, usuario, fecha_prestamo, fecha_devolucion, estado } = req.body;
+    dbConn.query(
+        'UPDATE prestamos SET libro_id = ?, usuario_id = ?, fecha_prestamo = ?, fecha_devolucion = ?, estado = ? WHERE id = ?',
+        [libro, usuario, fecha_prestamo, fecha_devolucion, estado, req.params.id],
+        function(err) {
+            if (err) {
+                req.flash('error', 'Hubo un error al actualizar el préstamo');
+            } else {
+                req.flash('success', 'Préstamo actualizado con éxito');
+            }
+            res.redirect('/books/prestamos');
+        }
+    );
+});
+
+// Eliminar préstamo
+router.post('/prestamos/delete/:id', function(req, res) {
+    dbConn.query('DELETE FROM prestamos WHERE id = ?', [req.params.id], function(err) {
+        if (err) {
+            req.flash('error', 'Hubo un error al eliminar el préstamo');
+        } else {
+            req.flash('success', 'Préstamo eliminado con éxito');
+        }
+        res.redirect('/books/prestamos');
+    });
+});
+
+// ...código existente...
+
+// Ruta para devolver un préstamo desde el dashboard del usuario
+router.post('/prestamos/devolver/:id', function(req, res) {
+    // Cambia el estado del préstamo a 'Devuelto'
+    dbConn.query(
+        'UPDATE prestamos SET estado = ? WHERE id = ?',
+        ['Devuelto', req.params.id],
+        function(err) {
+            if (err) {
+                req.flash('error', 'Error al devolver el libro');
+                return res.redirect('/dashboard-usuario');
+            }
+            // Busca el libro asociado a este préstamo
+            dbConn.query(
+                'SELECT libro_id FROM prestamos WHERE id = ?',
+                [req.params.id],
+                function(err2, result) {
+                    if (!err2 && result.length > 0) {
+                        // Cambia el estado del libro a 'Disponible'
+                        dbConn.query(
+                            'UPDATE libros SET estado = ? WHERE id = ?',
+                            ['Disponible', result[0].libro_id],
+                            function() {
+                                req.flash('success', 'Libro devuelto con éxito');
+                                res.redirect('/dashboard-usuario');
+                            }
+                        );
+                    } else {
+                        res.redirect('/dashboard-usuario');
+                    }
+                }
+            );
+        }
+    );
 });
 
 module.exports = router;
